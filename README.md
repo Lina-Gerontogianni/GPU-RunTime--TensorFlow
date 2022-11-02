@@ -1,7 +1,7 @@
 # GPU-RunTime-analysis---TensorFlow
 Regression analysis via ANN with Tensorflow '2.9.1'.
 
-A kaggle [dataset](https://www.kaggle.com/code/miquel0/gpu-runtime-analysis) is utilised to predict the GPU run time based on 14 variables. the number of instances is 241,600.
+A kaggle [dataset](https://www.kaggle.com/code/miquel0/gpu-runtime-analysis) is utilised to predict the GPU run time based on 14 variables. The number of instances is 241,600.
 
 ```
 Attribute Information:
