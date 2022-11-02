@@ -22,4 +22,6 @@ Attribute Information:
     15-18. Run1, Run2, Run3, Run4: performance times in milliseconds for 4 independent runs using the same parameters. They range between 13.25 and   3397.08.
 ```
 
-The employed inferential model is a Deep Neural Network with 5 layers. The python script can be found under the gpu_runtime_analysis.py, where the user can tune the hyperparameters (0ir, number of layers, neurons, learning rate etc) to achieve better performance. The training/test loss function per epoch for the current parametrisation, as well as the __predicted vs true__ GPU runtime values for the test set are provided into the images folder.
+- The employed inferential model is a Deep Neural Network with 5 layers. 
+- The python script can be found under the gpu_runtime_analysis.py, where the user can tune the hyperparameters (0ir, number of layers, neurons, learning rate etc) to achieve better performance. 
+- The training/test loss function per epoch for the current parametrisation, as well as the __predicted vs true__ GPU runtime values for the test set are provided into the images folder.
