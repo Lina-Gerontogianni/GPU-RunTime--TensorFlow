@@ -26,10 +26,12 @@ sk.utils.check_random_state(42)
 ## Importing the dataset
 os.chdir('.../kaggle_datasets/GPU-runtime_dataset')
 dataset = pd.read_csv('sgemm_product.csv')
+
+# Creating a new column (mean of Run1, Run2, Run3, Run4 GPU runtimes) that will work as the target variable 
 dataset['GPU_avg_run'] = dataset[dataset.columns[-4:]].mean(axis=1)
 dataset = dataset.drop(dataset.iloc[:,-5:-1], axis=1)
 
-## Separating features X from target variable y (GPU runtime)
+## Separating features X from target variable y (mean GPU runtime)
 X = dataset.iloc[:, :-1].values
 y = dataset.iloc[:, -1].values
 
@@ -45,11 +47,10 @@ X_test = sc.transform(X_test)
 
 ## Building the ANN
 dnn = Sequential(
-    [layers.Dense(65,kernel_initializer='normal', activation = 'relu'),
-     layers.Dense(65,kernel_initializer='normal', activation = 'relu'),
-     layers.Dense(50,kernel_initializer='normal', activation = 'relu'),
-     layers.Dense(40,kernel_initializer='normal', activation = 'relu'),
-     layers.Dense(30,kernel_initializer='normal', activation = 'relu'),
+    [layers.Dense(200,kernel_initializer='normal', activation = 'relu'),
+     layers.Dense(200,kernel_initializer='normal', activation = 'relu'),
+     layers.Dense(100,kernel_initializer='normal', activation = 'relu'),
+     layers.Dense(100,kernel_initializer='normal', activation = 'relu'),
      layers.Dense(1)
      ])
 
@@ -61,8 +62,9 @@ dnn.compile(optimizer = keras.optimizers.Adam(10e-4), loss='mean_squared_error')
 dnn_training = dnn.fit(X_train, y_train, batch_size = 100, epochs =200,
                        validation_split = 0.2)
 
-## Plotting the loss function
+## Plotting the loss functions
 def plot_loss(history):
+  plt.figure(figsize=(10, 10))
   plt.ylim(top=1000)
   plt.plot(history.history['loss'], label='training_loss')
   plt.plot(history.history['val_loss'], label='validation_loss')
