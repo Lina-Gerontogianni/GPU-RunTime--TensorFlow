@@ -61,7 +61,7 @@ dnn.compile(optimizer = keras.optimizers.Adam(10e-4), loss='mean_squared_error')
 dnn_training = dnn.fit(X_train, y_train, batch_size = 100, epochs =200,
                        validation_split = 0.2)
 
-## Plotting the loss functions
+## Plotting the loss function
 def plot_loss(history):
   plt.ylim(top=1000)
   plt.plot(history.history['loss'], label='training_loss')
