@@ -19,7 +19,7 @@ Attribute Information:
     
   - Output:
   
-    15-18. Run1, Run2, Run3, Run4: performance times in milliseconds for 4 independent runs using the same parameters. They range between 13.25 and   3397.08.
+    15-18. Run1, Run2, Run3, Run4: performance times in milliseconds for 4 independent runs using the same parameters. They range between 13.25 and 3397.08.
 ```
 
 - The employed inferential model is a Deep Artificial Neural Network with 5 layers. 
