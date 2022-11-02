@@ -1,7 +1,7 @@
 # GPU-RunTime-analysis---TensorFlow
 Regression analysis via ANN with Tensorflow '2.9.1'.
 
-A kaggle [dataset](https://www.kaggle.com/code/miquel0/gpu-runtime-analysis) is utilised to predict the GPU run time based on 14 variables.
+A kaggle [dataset](https://www.kaggle.com/code/miquel0/gpu-runtime-analysis) is utilised to predict the GPU run time based on 14 variables. the number of instances is 241,600.
 
 ```
 Attribute Information:
@@ -22,4 +22,4 @@ Attribute Information:
     15-18. Run1, Run2, Run3, Run4: performance times in milliseconds for 4 independent runs using the same parameters. They range between 13.25 and   3397.08.
 ```
 
-
+The employed inferential model is a Deep Neural Network with 5 layers. The python script can be found under the gpu_runtime_analysis.py, where the user can tune the hyperparameters (0ir, number of layers, neurons, learning rate etc) to achieve better performance. The training/test loss function per epoch for the current parametrisation, as well as the __predicted vs true__ GPU runtime values for the test set are provided into the images folder.
