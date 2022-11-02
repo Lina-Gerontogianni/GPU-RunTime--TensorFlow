@@ -5,10 +5,10 @@ A kaggle [dataset](https://www.kaggle.com/code/miquel0/gpu-runtime-analysis) is 
 
 ```
 Attribute Information:
+
   - Independent variables:
   
-    1-2. MWG, NWG: per-matrix 2D tiling at workgroup level: {16, 32, 64, 128} (integer)
-    
+    1-2. **MWG, NWG**: per-matrix 2D tiling at workgroup level: {16, 32, 64, 128} (integer)
     3. KWG: inner dimension of 2D tiling at workgroup level: {16, 32} (integer)
     
     4-5. MDIMC, NDIMC: local workgroup size: {8, 16, 32} (integer)
