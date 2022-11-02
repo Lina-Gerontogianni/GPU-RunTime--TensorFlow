@@ -3,7 +3,9 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
+import sklearn as sk
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
 
 ## Making NumPy printouts easier to read
 np.set_printoptions(precision=3, suppress=True)
@@ -18,6 +20,7 @@ from tensorflow.keras.models import Sequential
 from numpy.random import seed
 seed(42)
 tf.random.set_seed(42)
+sk.utils.check_random_state(42)
 
 
 ## Importing the dataset
@@ -36,7 +39,6 @@ from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
 
 ## Feature Scaling
-from sklearn.preprocessing import StandardScaler
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
@@ -56,11 +58,12 @@ dnn.compile(optimizer = keras.optimizers.Adam(10e-4), loss='mean_squared_error')
 
 
 ## Training the ANN
-dnn_training = dnn.fit(X_train, y_train, batch_size = 100, epochs =100,
+dnn_training = dnn.fit(X_train, y_train, batch_size = 100, epochs =200,
                        validation_split = 0.2)
 
 ## Plotting the loss functions
 def plot_loss(history):
+  plt.ylim(top=1000)
   plt.plot(history.history['loss'], label='training_loss')
   plt.plot(history.history['val_loss'], label='validation_loss')
   plt.xlabel('Epoch')
@@ -72,6 +75,9 @@ plot_loss(dnn_training)
 
 ## Predicting the GPU runtime for the test data
 y_pred = dnn.predict(X_test)
+
+## Calculating the Mean Squared Error of the predicted test values
+mean_squared_error(y_test.reshape(len(y_test),1), y_pred.reshape(len(y_pred),1))
 
 ## Plotting predicted vs true GPU values
 plt.figure(figsize=(10, 10))
