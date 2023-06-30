@@ -1,6 +1,18 @@
-## Importing libraries
-import tensorflow as tf
+## Importing the basic libraries
+import os
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import sklearn as sk
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
+
+## Making NumPy printouts easier to read
+np.set_printoptions(precision=3, suppress=True)
+
+## Importing libraries for the ANN
+import tensorflow as tf
+from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 
@@ -8,100 +20,73 @@ from tensorflow.keras.models import Sequential
 from numpy.random import seed
 seed(42)
 tf.random.set_seed(42)
+sk.utils.check_random_state(42)
 
-tf.__version__
-## Load the lemon dataset
-batch_size = 32
-img_height = 180
-img_width = 180
 
-data_path = '.../kaggle_datasets/lemon_dataset/dataset'
+## Importing the dataset
+os.chdir('.../kaggle_datasets/GPU-runtime_dataset')
+dataset = pd.read_csv('sgemm_product.csv')
 
-## Define Training set - 80% of the images
-training_set = tf.keras.utils.image_dataset_from_directory(
-  data_path,
-  validation_split=0.2,
-  subset="training",
-  seed=42,
-  image_size=(img_height, img_width),
-  batch_size=batch_size)
+# Creating a new column (mean of Run1, Run2, Run3, Run4 GPU runtimes) that will work as the target variable 
+dataset['GPU_avg_run'] = dataset[dataset.columns[-4:]].mean(axis=1)
+dataset = dataset.drop(dataset.iloc[:,-5:-1], axis=1)
 
-## Define Validation set - 20% of the images
-validation_set = tf.keras.utils.image_dataset_from_directory(
-  data_path,
-  validation_split=0.2,
-  subset="validation",
-  seed=42,
-  image_size=(img_height, img_width),
-  batch_size=batch_size)
+## Separating features X from target variable y (mean GPU runtime)
+X = dataset.iloc[:, :-1].values
+y = dataset.iloc[:, -1].values
 
-# Categories' names
-categ_names = training_set.class_names
-print(categ_names)
 
-## Plot 16 random images from the training set
-plt.figure(figsize=(11, 11))
-for images, labels in training_set.take(1):
-  for i in range(16):
-    ax = plt.subplot(4, 4, i + 1)
-    plt.imshow(images[i].numpy().astype("uint8"))
-    plt.title(categ_names[labels[i]])
-    plt.axis("off")
-    
-## Configure the dataset for performance
-autotune = tf.data.AUTOTUNE
+## Splitting the dataset into the Training set and Test set
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
 
-training_set = training_set.cache().prefetch(buffer_size=autotune)
-validation_set = validation_set.cache().prefetch(buffer_size=autotune)
+## Feature Scaling
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
 
-## Create the CNN 
-num_categories = len(categ_names)
+## Building the ANN
+dnn = Sequential(
+    [layers.Dense(200,input_shape = (X_train.shape[1],), kernel_initializer='normal', activation = 'relu'),
+     layers.Dense(200,kernel_initializer='normal', activation = 'relu'),
+     layers.Dense(100,kernel_initializer='normal', activation = 'relu'),
+     layers.Dense(100,kernel_initializer='normal', activation = 'relu'),
+     layers.Dense(1)
+     ])
 
-cnn = Sequential([
-    layers.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
-    layers.Conv2D(20, 3, activation = 'relu'),
-    layers.MaxPooling2D(),
-    layers.Conv2D(40, 3, activation='relu'),
-    layers.MaxPooling2D(),
-    layers.Flatten(),
-    layers.Dense(128, activation='relu'),
-    layers.Dense(1, activation='sigmoid')
-    ])
+## Compiling the ANN
+dnn.compile(optimizer = keras.optimizers.Adam(10e-4), loss='mean_squared_error')
 
-## Complile the CNN
-cnn.compile(optimizer='adam', loss='binary_crossentropy', metrics = ['accuracy'])
 
-# Model summary
-cnn.summary()
+## Training the ANN
+dnn_training = dnn.fit(X_train, y_train, batch_size = 100, epochs =200,
+                       validation_split = 0.2)
 
-## Train the CNN
-epochs = 20
+## Plotting the loss functions
+def plot_loss(history):
+  plt.figure(figsize=(10, 10))
+  plt.ylim(top=1000)
+  plt.plot(history.history['loss'], label='training_loss')
+  plt.plot(history.history['val_loss'], label='validation_loss')
+  plt.xlabel('Epoch')
+  plt.ylabel('Training error')
+  plt.legend()
+  plt.grid(True)
+  
+plot_loss(dnn_training)
 
-cnn_training = cnn.fit(training_set, validation_data = validation_set, 
-                       batch_size = 32, epochs = epochs)
+## Predicting the GPU runtime for the test data
+y_pred = dnn.predict(X_test)
 
-## Store and visualise the training results
-# accuracy
-acc = cnn_training.history['accuracy']
-val_acc = cnn_training.history['val_accuracy']
-# loss
-loss = cnn_training.history['loss']
-val_loss = cnn_training.history['val_loss']
+## Calculating the Mean Squared Error of the predicted test values
+mean_squared_error(y_test.reshape(len(y_test),1), y_pred.reshape(len(y_pred),1))
 
-epochs_range = range(epochs)
-
-## Accuracy plot
-plt.figure(figsize=(10, 8))
-plt.subplot(1, 2, 1)
-plt.plot(epochs_range, acc, label='Training Accuracy')
-plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
-plt.title('Training and Validation Accuracy')
-
-# Loss plot
-plt.subplot(1, 2, 2)
-plt.plot(epochs_range, loss, label='Training Loss')
-plt.plot(epochs_range, val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.title('Training and Validation Loss')
+## Plotting predicted vs true GPU values
+plt.figure(figsize=(10, 10))
+plt.xlabel('true') 
+plt.ylabel('predicted')
+plt.title('Test data: GPU running time')
+plt.scatter(y_test.reshape(len(y_test),1), y_pred.reshape(len(y_pred),1), s=0.3)
+plt.plot(y_test.reshape(len(y_test),1),y_test.reshape(len(y_test),1),
+         color='red', linewidth=0.5)
 plt.show()
